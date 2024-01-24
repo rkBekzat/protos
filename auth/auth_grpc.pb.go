@@ -25,6 +25,7 @@ type AuthClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	ParseToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error)
+	IsAdmin(ctx context.Context, in *AdminRequest, opts ...grpc.CallOption) (*AdminResponse, error)
 }
 
 type authClient struct {
@@ -62,6 +63,15 @@ func (c *authClient) ParseToken(ctx context.Context, in *TokenRequest, opts ...g
 	return out, nil
 }
 
+func (c *authClient) IsAdmin(ctx context.Context, in *AdminRequest, opts ...grpc.CallOption) (*AdminResponse, error) {
+	out := new(AdminResponse)
+	err := c.cc.Invoke(ctx, "/auth.Auth/IsAdmin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations should embed UnimplementedAuthServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type AuthServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	ParseToken(context.Context, *TokenRequest) (*TokenResponse, error)
+	IsAdmin(context.Context, *AdminRequest) (*AdminResponse, error)
 }
 
 // UnimplementedAuthServer should be embedded to have forward compatible implementations.
@@ -83,6 +94,9 @@ func (UnimplementedAuthServer) Login(context.Context, *LoginRequest) (*LoginResp
 }
 func (UnimplementedAuthServer) ParseToken(context.Context, *TokenRequest) (*TokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ParseToken not implemented")
+}
+func (UnimplementedAuthServer) IsAdmin(context.Context, *AdminRequest) (*AdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsAdmin not implemented")
 }
 
 // UnsafeAuthServer may be embedded to opt out of forward compatibility for this service.
@@ -150,6 +164,24 @@ func _Auth_ParseToken_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_IsAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).IsAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.Auth/IsAdmin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).IsAdmin(ctx, req.(*AdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -168,6 +200,10 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ParseToken",
 			Handler:    _Auth_ParseToken_Handler,
+		},
+		{
+			MethodName: "IsAdmin",
+			Handler:    _Auth_IsAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

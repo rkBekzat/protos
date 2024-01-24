@@ -24,6 +24,8 @@ message CreateResponse{
 
 message OrderIdRequest {
   int64 id = 1;
+  string authorId = 2;
+  bool isAdmin = 3;
 }
 
 message GetOrderResponse{
@@ -36,6 +38,8 @@ message GetOrderResponse{
 message UpdateRequest{
   int64 id = 1;
   string status = 2;
+  string authorId = 3;
+  bool isAdmin = 4;
 }
 
 message AuthorIdRequest{

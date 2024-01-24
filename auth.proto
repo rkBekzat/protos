@@ -8,8 +8,16 @@ service Auth{
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc ParseToken(TokenRequest) returns (TokenResponse);
+  rpc IsAdmin(AdminRequest) returns (AdminResponse);
 }
 
+message AdminRequest{
+  string id = 1;
+}
+
+message AdminResponse{
+  bool ok = 1;
+}
 
 message RegisterRequest{
   string name = 1;
